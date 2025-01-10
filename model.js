@@ -1,5 +1,3 @@
-const { Object } = require("fabric-contract-api");
-
 const enumTypeProduct = {
     Beef : "Beef",
     Jeroan : "Jeroan"
