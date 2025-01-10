@@ -1,7 +1,8 @@
 const { Contract } = require("fabric-contract-api");
 const crypto = require("crypto");
 const validateData = require("./utils");
-const imporSchema = require("../../fablo-target/dto/model");
+const imporSchema = require("./dto/model");
+const distribusiSchema = require("./dto/distribusiModel");
 
 class Dagingbekucontract extends Contract {
   constructor() {
@@ -38,6 +39,35 @@ class Dagingbekucontract extends Contract {
     await ctx.stub.putState(hash, stringData);
     return{
       status: 201,
+      hash: hash,
+    }
+  }
+  async distribusi(ctx, data, user){
+    let jsonData = JSON.parse(data);
+    
+    if (user === "" || !user){
+      return {
+        status: 400,
+        message: "user input doesnt exist",
+      };
+    }
+    const validDistribusi = validateData(jsonData.distribusi, distribusiSchema);
+
+    if (validDistribusi.status){
+      return {
+        status: 400,
+        message: validDistribusi.validate.errors,
+      };
+    }
+    jsonData.timestamp = ctx.stub.getTxTimestamp();
+    jsonData.status = "terdistribusi";
+    jsonData.user = user;
+
+    const stringData = JSON.stringify(jsonData);
+    const hash = crypto.createHash("sha256").update(stringData).digest("hex");
+    await ctx.stub.putState(hash, stringData);
+    return{
+      status: 200,
       hash: hash,
     }
   }
